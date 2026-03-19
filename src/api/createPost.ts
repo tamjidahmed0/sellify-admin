@@ -1,4 +1,4 @@
-import type { ProductFormData } from "../components/ui/AddProductModal/Types";
+import { type ProductFormData } from "../types";
 
 const API_URL = import.meta.env.VITE_API_URL;
 

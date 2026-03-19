@@ -1,63 +1,3 @@
-export interface Stat {
-  label: string;
-  value: string;
-  change: string;
-  up: boolean;
-  color: string;
-  dot: string;
-}
-
-// export interface Product {
-//   id: number;
-//   name: string;
-//   category: string;
-//   price: string;
-//   stock: number;
-//   status: 'In Stock' | 'Out of Stock' | 'Low Stock';
-//   img: string;
-// }
-
-export interface Order {
-  id: string;
-  customer: string;
-  date: string;
-  total: string;
-  status: 'Delivered' | 'Processing' | 'Pending' | 'Shipped' | 'Cancelled';
-  items: number;
-}
-
-// export interface Category {
-//   id: number;
-//   name: string;
-//   products: number;
-//   img: string;
-// }
-
-export interface Slide {
-  id: number;
-  badge: string;
-  title: string;
-  subtitle: string;
-  link: string;
-  img: string;
-}
-
-export type PageKey = 'dashboard' | 'products' | 'categories' | 'orders' | 'slides' | 'users';
-
-// export type StockStatus = Product['status'];
-export type OrderStatus = Order['status'];
-
-
-
-
-
-
-
-
-
-
-
-//start
 
 export interface ProductCategory {
     id: number;
@@ -81,13 +21,6 @@ interface Product {
 
 
 export type ProductsResponse = Product[];
-
-
-
-
-
-
-
 
 
 export interface AddProductModalProps {
@@ -114,7 +47,7 @@ export interface ProductFormData {
 export interface Category {
   id: string;
   name: string;
-  createdAt: string;
+  createdAt?: string;
   image: string;
   productCount:number
 }

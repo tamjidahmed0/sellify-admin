@@ -3,10 +3,19 @@ import { Modal, Form, Input, Button } from "antd";
 import { InboxOutlined, PlusOutlined } from "@ant-design/icons";
 import type { Category } from "../../types";
 
+// onSubmit receives imageFile (File object) separately — needed for FormData upload
+export interface CategorySubmitData {
+    id?: string;
+    name: string;
+    imageFile: File | null;
+    existingImageUrl?: string;
+    productCount?: number;
+}
+
 interface AddCategoryModalProps {
     open: boolean;
     onClose: () => void;
-    onSubmit: (category: Category) => void;
+    onSubmit: (data: CategorySubmitData) => void;
     initialData?: Category;
     isPending?: boolean;
 }
@@ -29,11 +38,11 @@ export default function AddCategoryModal({
     useEffect(() => {
         if (open && initialData) {
             form.setFieldsValue({ name: initialData.name });
-            setPreview(initialData.img || null);
+            setPreview(initialData.image || null);
         }
     }, [open, initialData]);
 
-    // Reset on close
+    // Reset everything on close
     useEffect(() => {
         if (!open) {
             form.resetFields();
@@ -45,8 +54,7 @@ export default function AddCategoryModal({
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        setImageFile(file);
-        // Show local preview immediately
+        setImageFile(file); // keep actual File object for FormData
         const reader = new FileReader();
         reader.onload = (ev) => setPreview(ev.target?.result as string);
         reader.readAsDataURL(file);
@@ -54,12 +62,13 @@ export default function AddCategoryModal({
 
     const handleSubmit = async () => {
         const values = await form.validateFields();
+        console.log(values, 'ksk')
         onSubmit({
-            id: initialData?.id ?? Date.now(),
+            id: initialData?.id,
             name: values.name,
-            img: preview || "",
-            // TODO: pass imageFile to API instead of base64 preview
-            products: initialData?.products ?? 0,
+            imageFile,                                      // File object — sent to API
+            existingImageUrl: initialData?.image ?? undefined,
+            productCount: initialData?.productCount ?? 0,
         });
     };
 
@@ -87,7 +96,7 @@ export default function AddCategoryModal({
                         onClick={handleSubmit}
                         loading={isPending}
                         icon={isEditMode ? undefined : <PlusOutlined />}
-                        className="bg-indigo-600 hover:!bg-indigo-500 border-none rounded-xl px-6"
+                        className="bg-indigo-600 hover:bg-indigo-500! border-none rounded-xl px-6"
                     >
                         {isPending ? "Saving…" : isEditMode ? "Save Changes" : "Add Category"}
                     </Button>
@@ -96,11 +105,11 @@ export default function AddCategoryModal({
             width={420}
             centered
             styles={{ body: { padding: "24px 28px" } }}
-            destroyOnClose
+            destroyOnHidden
         >
             <Form form={form} layout="vertical" requiredMark={false}>
 
-                {/* Image upload — full preview when selected */}
+                {/* Image upload zone — full preview when selected */}
                 <Form.Item label={<FieldLabel>Category Image</FieldLabel>} className="mb-5">
                     <input
                         ref={fileRef}
@@ -109,8 +118,6 @@ export default function AddCategoryModal({
                         className="hidden"
                         onChange={handleImageChange}
                     />
-
-                    {/* Click anywhere on the zone to upload */}
                     <div
                         onClick={() => fileRef.current?.click()}
                         className={`relative cursor-pointer rounded-2xl border-2 border-dashed transition-all overflow-hidden flex items-center justify-center group
@@ -121,13 +128,7 @@ export default function AddCategoryModal({
                     >
                         {preview ? (
                             <>
-                                {/* Full image preview fills the zone */}
-                                <img
-                                    src={preview}
-                                    alt="category preview"
-                                    className="w-full h-full object-cover"
-                                />
-                                {/* Hover overlay */}
+                                <img src={preview} alt="preview" className="w-full h-full object-cover" />
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-2">
                                     <span className="text-white text-xs font-semibold bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
                                         Click to change
@@ -155,7 +156,7 @@ export default function AddCategoryModal({
                     </div>
                 </Form.Item>
 
-                {/* Category name */}
+                {/* Category name input */}
                 <Form.Item
                     name="name"
                     label={<FieldLabel>Category Name <span className="text-rose-400">*</span></FieldLabel>}
@@ -168,7 +169,6 @@ export default function AddCategoryModal({
                         className="rounded-xl border-gray-200 bg-gray-50 hover:border-indigo-300"
                     />
                 </Form.Item>
-
             </Form>
         </Modal>
     );

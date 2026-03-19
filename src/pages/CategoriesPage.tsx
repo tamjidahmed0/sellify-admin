@@ -1,39 +1,53 @@
 import { useState } from "react";
 import { Modal, message } from "antd";
 import { PlusOutlined, ExclamationCircleOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import AddCategoryModal from "../components/ui/AddCategoryModal";
+import AddCategoryModal, { type CategorySubmitData } from "../components/ui/AddCategoryModal";
 import type { Category } from "../types";
-import { CATEGORIES } from "../data/mockData";
 import { useGetCategories } from "../hooks/useGetCategories";
-// import { useCreateCategory } from "../hooks/useCreateCategory";
-// import { useUpdateCategory } from "../hooks/useUpdateCategory";
-// import { useDeleteCategory } from "../hooks/useDeleteCategory";
+import { useCreateCategory } from "../hooks/useCreateCategory";
+import { useUpdateCategory } from "../hooks/useupdateCategory";
+import { useDeleteCategory } from "../hooks/useDeleteCategory";
 
 export default function CategoriesPage() {
-    // const [categories, setCategories] = useState<Category[]>(CATEGORIES);
-
-    // Replace useState above with real API hooks when ready:
     const { data: categories = [], isLoading } = useGetCategories();
-    // const { mutate: createMutate, isPending: createPending } = useCreateCategory();
-    // const { mutate: updateMutate, isPending: updatePending } = useUpdateCategory();
-    // const { mutate: deleteMutate, isPending: deletePending } = useDeleteCategory();
+    const { mutate: createMutate, isPending: createPending } = useCreateCategory();
+    const { mutate: updateMutate, isPending: updatePending } = useUpdateCategory();
+    const { mutate: deleteMutate } = useDeleteCategory();
 
     const [addOpen, setAddOpen] = useState(false);
     const [editTarget, setEditTarget] = useState<Category | null>(null);
-    const [deletingId, setDeletingId] = useState<string | number | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    const handleAdd = (newCat: Category) => {
-        // TODO: replace with createMutate(newCat, { onSuccess: () => setAddOpen(false) })
-        // setCategories((prev) => [...prev, newCat]);
-        setAddOpen(false);
-        message.success("Category added");
+    const handleAdd = (data: CategorySubmitData) => {
+        // Pass name + actual File object to the API
+        createMutate(
+            { name: data.name, image: data.imageFile ?? undefined },
+            {
+                onSuccess: () => {
+                    setAddOpen(false);
+                    message.success("Category added");
+                },
+                onError: () => message.error("Something went wrong!"),
+            }
+        );
     };
 
-    const handleEdit = (updated: Category) => {
-        // TODO: replace with updateMutate(updated, { onSuccess: () => setEditTarget(null) })
-        // setCategories((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
-        setEditTarget(null);
-        message.success("Category updated");
+    const handleEdit = (data: CategorySubmitData) => {
+        if (!data.id) return;
+        updateMutate(
+            {
+                id: data.id,
+                name: data.name,
+                image: data.imageFile,
+            },
+            {
+                onSuccess: () => {
+                    setEditTarget(null);
+                    message.success("Category updated");
+                },
+                onError: () => message.error("Something went wrong!"),
+            }
+        );
     };
 
     const handleDeleteClick = (c: Category) => {
@@ -51,17 +65,22 @@ export default function CategoriesPage() {
             okButtonProps: { danger: true, className: "rounded-lg" },
             cancelButtonProps: { className: "rounded-lg" },
             centered: true,
-            // Returning a Promise keeps OK button in loading state until done
+            // Returning a Promise keeps the OK button in loading state until done
             onOk() {
-                return new Promise<void>((resolve) => {
+                return new Promise<void>((resolve, reject) => {
                     setDeletingId(c.id);
-                    // TODO: replace with deleteMutate(c.id, { onSuccess, onError })
-                    setTimeout(() => {
-                        // setCategories((prev) => prev.filter((cat) => cat.id !== c.id));
-                        setDeletingId(null);
-                        message.success("Category deleted");
-                        resolve();
-                    }, 600);
+                    deleteMutate(c.id, {
+                        onSuccess: () => {
+                            setDeletingId(null);
+                            message.success("Category deleted");
+                            resolve();
+                        },
+                        onError: () => {
+                            setDeletingId(null);
+                            message.error("Something went wrong!");
+                            reject();
+                        },
+                    });
                 });
             },
         });
@@ -74,7 +93,9 @@ export default function CategoriesPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Categories</h1>
-                    <p className="text-sm text-gray-400 mt-0.5">{categories.length} categories total</p>
+                    <p className="text-sm text-gray-400 mt-0.5">
+                        {isLoading ? "Loading…" : `${categories.length} categories total`}
+                    </p>
                 </div>
                 <button
                     onClick={() => setAddOpen(true)}
@@ -86,7 +107,21 @@ export default function CategoriesPage() {
             </div>
 
             {/* ── Category grid ── */}
-            {categories.length === 0 ? (
+            {isLoading ? (
+                // Skeleton loading grid
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4 animate-pulse">
+                            <div className="w-14 h-14 rounded-xl bg-gray-100 shrink-0" />
+                            <div className="space-y-2 flex-1">
+                                <div className="h-3.5 w-24 bg-gray-100 rounded-lg" />
+                                <div className="h-3 w-16 bg-gray-100 rounded-lg" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : categories.length === 0 ? (
+                // Empty state
                 <div className="flex flex-col items-center justify-center py-24 gap-3 text-gray-400">
                     <span className="text-4xl">🗂️</span>
                     <p className="text-sm font-medium text-gray-500">No categories yet</p>
@@ -144,13 +179,15 @@ export default function CategoriesPage() {
             {/* Add Modal */}
             <AddCategoryModal
                 open={addOpen}
+                isPending={createPending}
                 onClose={() => setAddOpen(false)}
                 onSubmit={handleAdd}
             />
 
-            {/* Edit Modal */}
+            {/* Edit Modal — same modal, initialData triggers edit mode */}
             <AddCategoryModal
                 open={!!editTarget}
+                isPending={updatePending}
                 initialData={editTarget ?? undefined}
                 onClose={() => setEditTarget(null)}
                 onSubmit={handleEdit}
