@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { ProductFormData } from "../components/ui/AddProductModal/Types";
+import {type ProductFormData } from "../types";
 import createPost from "../api/createPost";
 
 

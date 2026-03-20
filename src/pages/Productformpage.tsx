@@ -413,9 +413,9 @@ export default function ProductFormPage() {
                                     size="large"
                                     className="w-full rounded-xl"
                                     allowClear
-                                    options={categories.map((c: { id: number; name: string }) => ({
+                                    options={categories.map((c: { id: string; name: string }) => ({
                                         label: c.name,
-                                        value: String(c.id),
+                                        value: c.id,
                                     }))}
                                 />
                             </Form.Item>
