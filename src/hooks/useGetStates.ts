@@ -44,6 +44,23 @@ export const useGetStates = () => {
                 color: "bg-amber-50 text-amber-600",
                 dot: "bg-amber-500",
             },
+
+
+            {
+                // Cancelled this month vs last month
+                // up = false when cancellations increased (bad for business)
+                label: "Cancelled Orders",
+                value: Number(data.cancelled.thisMonth).toLocaleString(),
+                change: formatChange(data.cancelled.thisMonth, data.cancelled.lastMonth),
+                up: !isUp(data.cancelled.thisMonth, data.cancelled.lastMonth), // fewer cancellations = good
+                color: data.cancelled.thisMonth > 0
+                    ? "bg-rose-50 text-rose-600"
+                    : "bg-emerald-50 text-emerald-600",
+                dot: data.cancelled.thisMonth > 0 ? "bg-rose-500" : "bg-emerald-500",
+            },
+
+
+
             {
                 label: "Total Users",
                 value: Number(data.users.total).toLocaleString(),

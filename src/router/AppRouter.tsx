@@ -9,6 +9,7 @@ import OrdersPage from '../pages/OrdersPage';
 import SlidesPage from '../pages/SlidesPage';
 import UsersPage from '../pages/UsersPage';
 import ProductFormPage from '../pages/Productformpage';
+import OrderDetailPage from '../pages/OrderDetailPage';
 
 export default function AppRouter() {
     return (
@@ -29,6 +30,7 @@ export default function AppRouter() {
 
                     <Route path="/categories" element={<CategoriesPage />} />
                     <Route path="/orders" element={<OrdersPage />} />
+                    <Route path="/orders/:id" element={<OrderDetailPage />} />
                     <Route path="/slides" element={<SlidesPage />} />
                     <Route path="/users" element={<UsersPage />} />
                 </Route>

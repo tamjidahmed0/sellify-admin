@@ -1,12 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Select, DatePicker, message } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import type { Order, OrdersQuery, OrderStatus } from '../types';
 import { useUpdateOrderStatus } from '../hooks/useUpdateOrderStatus';
 import { useGetOrders } from '../hooks/useGetOrders';
 
-
-// ── Constants ──────────────────────────────────────────────────
 const STATUS_OPTIONS: { label: string; value: OrderStatus | '' }[] = [
   { label: 'All Status', value: '' },
   { label: 'Pending', value: 'PENDING' },
@@ -16,7 +15,6 @@ const STATUS_OPTIONS: { label: string; value: OrderStatus | '' }[] = [
   { label: 'Cancelled', value: 'CANCELLED' },
 ];
 
-// Status that can be set from current status — defines allowed transitions
 const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   PENDING: ['PROCESSING', 'CANCELLED'],
   PROCESSING: ['SHIPPED', 'CANCELLED'],
@@ -35,30 +33,24 @@ const STATUS_STYLE: Record<OrderStatus, string> = {
 
 const LIMIT = 10;
 
-// ── Skeleton row ───────────────────────────────────────────────
 function SkeletonRow() {
   return (
     <tr>
       {[60, 120, 80, 40, 60, 90, 40].map((w, i) => (
         <td key={i} className="px-6 py-4">
-          <div
-            className="h-4 bg-gray-100 rounded-lg animate-pulse"
-            style={{ width: w }}
-          />
+          <div className="h-4 bg-gray-100 rounded-lg animate-pulse" style={{ width: w }} />
         </td>
       ))}
     </tr>
   );
 }
 
-// ── Status dropdown cell ───────────────────────────────────────
 function StatusCell({ order }: { order: Order }) {
   const { mutate, isPending } = useUpdateOrderStatus();
   const allowed = STATUS_TRANSITIONS[order.status];
   const isTerminal = allowed.length === 0;
 
   if (isTerminal) {
-    // DELIVERED and CANCELLED cannot be changed
     return (
       <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${STATUS_STYLE[order.status]}`}>
         {order.status}
@@ -72,6 +64,8 @@ function StatusCell({ order }: { order: Order }) {
       size="small"
       loading={isPending}
       className="w-36"
+      // Prevent row click from triggering when using the dropdown
+      onClick={(e) => e.stopPropagation()}
       onChange={(newStatus: OrderStatus) => {
         mutate(
           { id: order.rawId, status: newStatus },
@@ -82,7 +76,6 @@ function StatusCell({ order }: { order: Order }) {
         );
       }}
       options={[
-        // Current status shown but disabled — just for display
         {
           label: (
             <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_STYLE[order.status]}`}>
@@ -105,28 +98,21 @@ function StatusCell({ order }: { order: Order }) {
   );
 }
 
-// ── Main page ──────────────────────────────────────────────────
 export default function OrdersPage() {
-  const [query, setQuery] = useState<OrdersQuery>({
-    page: 1,
-    limit: LIMIT,
-    search: '',
-    status: '',
-    dateFrom: '',
-    dateTo: '',
-  });
+  const navigate = useNavigate();
 
+  const [query, setQuery] = useState<OrdersQuery>({
+    page: 1, limit: LIMIT, search: '', status: '', dateFrom: '', dateTo: '',
+  });
   const [searchInput, setSearchInput] = useState('');
 
   const { data, isLoading, isFetching } = useGetOrders(query);
   const orders = data?.data ?? [];
   const meta = data?.meta;
 
-  const setFilter = (patch: Partial<OrdersQuery>) => {
+  const setFilter = (patch: Partial<OrdersQuery>) =>
     setQuery((prev) => ({ ...prev, page: 1, ...patch }));
-  };
 
-  // Trigger search on Enter or blur
   const handleSearch = () => setFilter({ search: searchInput });
 
   return (
@@ -142,13 +128,10 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Table card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
         {/* Filter bar */}
         <div className="px-6 py-4 border-b border-gray-50 flex flex-col sm:flex-row sm:items-center gap-3">
-
-          {/* Search */}
           <div className="relative flex-1 max-w-xs">
             <SearchOutlined className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
             <input
@@ -161,7 +144,6 @@ export default function OrdersPage() {
             />
           </div>
 
-          {/* Status filter */}
           <Select
             value={query.status}
             onChange={(v) => setFilter({ status: v })}
@@ -170,7 +152,6 @@ export default function OrdersPage() {
             placeholder="All Status"
           />
 
-          {/* Date range */}
           <DatePicker.RangePicker
             className="rounded-xl border-gray-200"
             onChange={(_, [from, to]) => setFilter({ dateFrom: from, dateTo: to })}
@@ -178,7 +159,6 @@ export default function OrdersPage() {
             allowClear
           />
 
-          {/* Fetching indicator */}
           {isFetching && !isLoading && (
             <span className="text-xs text-gray-400 shrink-0 animate-pulse">Updating…</span>
           )}
@@ -189,8 +169,8 @@ export default function OrdersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50/80">
-                {['Order ID', 'Customer', 'Date', 'Items', 'Total', 'Status'].map((h) => (
-                  <th key={h} className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-widest whitespace-nowrap">
+                {['Order ID', 'Customer', 'Date', 'Items', 'Total', 'Status', ''].map((h, i) => (
+                  <th key={i} className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-widest whitespace-nowrap">
                     {h}
                   </th>
                 ))}
@@ -221,9 +201,14 @@ export default function OrdersPage() {
                 </tr>
               ) : (
                 orders.map((o) => (
-                  <tr key={o.id} className="hover:bg-gray-50/60 transition-colors group">
+                  <tr
+                    key={o.id}
+                    className="hover:bg-indigo-50/30 transition-colors group cursor-pointer"
+                  >
                     <td className="px-6 py-4">
-                      <span className="font-mono text-xs font-semibold text-indigo-600">{o.id}</span>
+                      <span className="font-mono text-xs font-semibold text-indigo-600 group-hover:underline">
+                        {o.id}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <p className="font-semibold text-gray-900 leading-tight">{o.customer}</p>
@@ -241,7 +226,12 @@ export default function OrdersPage() {
                     <td className="px-6 py-4">
                       <StatusCell order={o} />
                     </td>
-
+                    {/* View arrow — visible on row hover */}
+                    <td className="px-6 py-4 text-right">
+                      <span className="text-xs text-gray-300 group-hover:text-indigo-500 font-medium transition-colors" onClick={() => navigate(`/orders/${o.rawId}`)}>
+                        View →
+                      </span>
+                    </td>
                   </tr>
                 ))
               )}
@@ -249,7 +239,7 @@ export default function OrdersPage() {
           </table>
         </div>
 
-        {/* Pagination footer */}
+        {/* Pagination */}
         {meta && meta.totalPages > 1 && (
           <div className="px-6 py-4 border-t border-gray-50 bg-gray-50/40 flex items-center justify-between gap-4">
             <p className="text-xs text-gray-400">
@@ -261,22 +251,16 @@ export default function OrdersPage() {
             </p>
 
             <div className="flex items-center gap-1">
-              {/* Prev */}
               <button
-                onClick={() => setQuery((p) => ({ ...p, page: p.page! - 1 }))}
+                onClick={(e) => { e.stopPropagation(); setQuery((p) => ({ ...p, page: p.page! - 1 })); }}
                 disabled={meta.page <= 1}
                 className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
               >
                 ← Prev
               </button>
 
-              {/* Page numbers */}
               {Array.from({ length: meta.totalPages }, (_, i) => i + 1)
-                .filter((p) =>
-                  p === 1 ||
-                  p === meta.totalPages ||
-                  Math.abs(p - meta.page) <= 1
-                )
+                .filter((p) => p === 1 || p === meta.totalPages || Math.abs(p - meta.page) <= 1)
                 .reduce<(number | '...')[]>((acc, p, i, arr) => {
                   if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push('...');
                   acc.push(p);
@@ -288,10 +272,10 @@ export default function OrdersPage() {
                   ) : (
                     <button
                       key={p}
-                      onClick={() => setQuery((prev) => ({ ...prev, page: p as number }))}
+                      onClick={(e) => { e.stopPropagation(); setQuery((prev) => ({ ...prev, page: p as number })); }}
                       className={`w-8 h-8 text-xs font-semibold rounded-lg transition ${meta.page === p
-                          ? 'bg-indigo-600 text-white shadow-sm'
-                          : 'border border-gray-200 text-gray-600 hover:bg-gray-100'
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'border border-gray-200 text-gray-600 hover:bg-gray-100'
                         }`}
                     >
                       {p}
@@ -299,9 +283,8 @@ export default function OrdersPage() {
                   )
                 )}
 
-              {/* Next */}
               <button
-                onClick={() => setQuery((p) => ({ ...p, page: p.page! + 1 }))}
+                onClick={(e) => { e.stopPropagation(); setQuery((p) => ({ ...p, page: p.page! + 1 })); }}
                 disabled={meta.page >= meta.totalPages}
                 className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
               >
