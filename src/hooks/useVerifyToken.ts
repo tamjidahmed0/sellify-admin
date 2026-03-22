@@ -22,7 +22,6 @@ const verifyToken = async (): Promise<VerifyTokenResponse> => {
 
     if (!response.ok) {
         Cookies.remove('token');
-        localStorage.removeItem('token');
         throw new Error('Token invalid or expired');
     }
 
