@@ -42,7 +42,12 @@ export interface OrderDetail {
 
 // ── API ────────────────────────────────────────────────────────
 const fetchOrderById = async (id: string): Promise<OrderDetail> => {
-    const res = await fetch(`${API_URL}/order/${id}`);
+    const token = Cookies.get('token')
+    const res = await fetch(`${API_URL}/order/${id}`, {
+        headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        }
+    });
     if (!res.ok) throw new Error('Failed to fetch order');
     return res.json();
 };
@@ -51,8 +56,8 @@ const updateStatus = async ({ id, status, note }: { id: string; status: OrderSta
     const token = Cookies.get('token')
     const res = await fetch(`${API_URL}/order/${id}/status`, {
         method: 'PATCH',
-        headers: { 
-            'Content-Type': 'application/json' ,
+        headers: {
+            'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
 
         },
