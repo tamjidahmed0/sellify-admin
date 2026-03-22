@@ -7,10 +7,11 @@ import ProductsPage from '../pages/ProductsPage';
 import CategoriesPage from '../pages/CategoriesPage';
 import OrdersPage from '../pages/OrdersPage';
 import SlidesPage from '../pages/SlidesPage';
-import UsersPage from '../pages/UsersPage';
 import ProductFormPage from '../pages/Productformpage';
 import OrderDetailPage from '../pages/OrderDetailPage';
 import PublicRoute from './PublicRoute';
+import SlideFormPage from '../pages/SlideFormPage';
+import ReviewsPage from '../pages/ReviewPage';
 
 export default function AppRouter() {
     return (
@@ -30,6 +31,8 @@ export default function AppRouter() {
                     <Route path="/products" element={<ProductsPage />} />
                     <Route path="/products/add" element={<ProductFormPage />} />
                     <Route path="/products/edit/:id" element={<ProductFormPage />} />
+                    <Route path="/reviews" element={<ReviewsPage />} />
+
 
 
 
@@ -37,7 +40,8 @@ export default function AppRouter() {
                     <Route path="/orders" element={<OrdersPage />} />
                     <Route path="/orders/:id" element={<OrderDetailPage />} />
                     <Route path="/slides" element={<SlidesPage />} />
-                    <Route path="/users" element={<UsersPage />} />
+                    <Route path="/slides/add" element={<SlideFormPage />} />
+                    <Route path="/slides/edit/:id" element={<SlideFormPage />} />
                 </Route>
             </Route>
 

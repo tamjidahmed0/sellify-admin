@@ -14,7 +14,7 @@ const NAV: NavItem[] = [
   { path: '/categories', label: 'Categories', icon: 'categories' },
   { path: '/orders', label: 'Orders', icon: 'orders' },
   { path: '/slides', label: 'Hero Slides', icon: 'slides' },
-  { path: '/users', label: 'Users', icon: 'users' },
+  { path: '/reviews', label: 'reviews', icon: 'review' },
 ];
 
 interface SidebarProps {
