@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
+import Cookies from 'js-cookie';
 const API_URL = import.meta.env.VITE_API_URL;
 
 // ── Types ──────────────────────────────────────────────────────
@@ -48,9 +48,14 @@ const fetchOrderById = async (id: string): Promise<OrderDetail> => {
 };
 
 const updateStatus = async ({ id, status, note }: { id: string; status: OrderStatus; note?: string }) => {
+    const token = Cookies.get('token')
     const res = await fetch(`${API_URL}/order/${id}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            'Content-Type': 'application/json' ,
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+
+        },
         body: JSON.stringify({ status, note }),
     });
     if (!res.ok) throw new Error('Failed to update status');

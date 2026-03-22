@@ -1,14 +1,15 @@
-// import type { ProductFormData } from "../components/ui/AddProductModal/Types";
+import Cookies from "js-cookie";
 import { type ProductFormData } from "../types";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export interface UpdateProductPayload extends ProductFormData {
     id: string;
-  
+
 }
 
 const updateProduct = async ({ id, ...data }: UpdateProductPayload) => {
+    const token = Cookies.get('token')
     const formData = new FormData();
 
     // Text fields
@@ -22,8 +23,8 @@ const updateProduct = async ({ id, ...data }: UpdateProductPayload) => {
     const categoryIds = Array.isArray(data.categoryId)
         ? data.categoryId
         : data.categoryId
-        ? [data.categoryId]
-        : [];
+            ? [data.categoryId]
+            : [];
     categoryIds.forEach((cid) => formData.append("categoryId", cid));
 
     // New thumbnail — only append if a new file was selected
@@ -43,8 +44,11 @@ const updateProduct = async ({ id, ...data }: UpdateProductPayload) => {
 
     const response = await fetch(`${API_URL}/product/${id}`, {
         method: "PATCH",
+        headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: formData,
-        // Do not set Content-Type — browser sets it with boundary automatically
+
     });
 
     if (!response.ok) {

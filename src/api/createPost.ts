@@ -1,10 +1,12 @@
 import { type ProductFormData } from "../types";
-
+import Cookies from "js-cookie";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const createPost = async (data: ProductFormData) => {
+    const token = Cookies.get('token')
+
+
     const formData = new FormData();
-    console.log(data.description, 'descriptiopn')
 
     // Text fields
     formData.append("name", data.name);
@@ -33,6 +35,9 @@ const createPost = async (data: ProductFormData) => {
 
     const response = await fetch(`${API_URL}/product/create`, {
         method: "POST",
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: formData,
 
     });

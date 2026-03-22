@@ -1,8 +1,13 @@
+import Cookies from "js-cookie";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const deleteProduct = async (id: string) => {
+    const token = Cookies.get('token')
     const response = await fetch(`${API_URL}/product/${id}`, {
         method: "DELETE",
+        headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
     });
 
     if (!response.ok) {

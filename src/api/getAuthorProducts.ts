@@ -1,9 +1,14 @@
+import Cookies from "js-cookie";
 const API_URL = import.meta.env.VITE_API_URL;
 
 
 const getAuthorProducts = async () => {
+    const token = Cookies.get('token')
     const res = await fetch(`${API_URL}/product/author/products`, {
         method: 'GET',
+        headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
 
     });
 

@@ -62,7 +62,6 @@ export default function AddCategoryModal({
 
     const handleSubmit = async () => {
         const values = await form.validateFields();
-        console.log(values, 'ksk')
         onSubmit({
             id: initialData?.id,
             name: values.name,

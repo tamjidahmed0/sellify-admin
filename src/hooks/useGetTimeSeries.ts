@@ -1,9 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-
+import Cookies from "js-cookie";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const fetchTimeSeries = async (days: number) => {
-    const response = await fetch(`${API_URL}/analytics/time-series?days=${days}`);
+    const token = Cookies.get('token')
+    const response = await fetch(`${API_URL}/analytics/time-series?days=${days}`, {
+        headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
     if (!response.ok) throw new Error("Failed to fetch time series");
     return response.json();
 };
