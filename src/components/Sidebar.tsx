@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import Icon from './Icons';
-import { useAuth } from '../context/AuthContext';
+
 
 interface NavItem {
   path: string;
@@ -9,12 +9,12 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { path: '/dashboard',  label: 'Dashboard',   icon: 'dashboard' },
-  { path: '/products',   label: 'Products',    icon: 'products' },
-  { path: '/categories', label: 'Categories',  icon: 'categories' },
-  { path: '/orders',     label: 'Orders',      icon: 'orders' },
-  { path: '/slides',     label: 'Hero Slides', icon: 'slides' },
-  { path: '/users',      label: 'Users',       icon: 'users' },
+  { path: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
+  { path: '/products', label: 'Products', icon: 'products' },
+  { path: '/categories', label: 'Categories', icon: 'categories' },
+  { path: '/orders', label: 'Orders', icon: 'orders' },
+  { path: '/slides', label: 'Hero Slides', icon: 'slides' },
+  { path: '/users', label: 'Users', icon: 'users' },
 ];
 
 interface SidebarProps {
@@ -23,7 +23,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ open, setOpen }: SidebarProps) {
-  const { logout } = useAuth();
+
 
   return (
     <>
@@ -95,7 +95,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
               <p className="text-xs text-gray-400 truncate">admin@sellify.com</p>
             </div>
             <button
-              onClick={logout}
+
               className="text-gray-400 hover:text-rose-500 transition"
               title="Logout"
             >

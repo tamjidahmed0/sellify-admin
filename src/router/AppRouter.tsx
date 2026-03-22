@@ -10,12 +10,17 @@ import SlidesPage from '../pages/SlidesPage';
 import UsersPage from '../pages/UsersPage';
 import ProductFormPage from '../pages/Productformpage';
 import OrderDetailPage from '../pages/OrderDetailPage';
+import PublicRoute from './PublicRoute';
 
 export default function AppRouter() {
     return (
         <Routes>
             {/* Public */}
-            <Route path="/login" element={<LoginPage />} />
+
+            <Route element={<PublicRoute />}>
+                <Route path="/login" element={<LoginPage />} />
+            </Route>
+
 
             {/* Protected — all admin pages share the AdminLayout */}
             <Route element={<ProtectedRoute />}>

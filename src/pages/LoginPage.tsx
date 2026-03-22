@@ -1,23 +1,36 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../components/Icons';
-import { useAuth } from '../context/AuthContext';
+
+import { useLogin } from '../hooks/useLogin';
+import { message } from 'antd';
+import Cookies from 'js-cookie';
+
 
 export default function LoginPage() {
-  const { login } = useAuth();
+
   const navigate = useNavigate();
-  const [email, setEmail] = useState('admin@sellify.com');
-  const [password, setPassword] = useState('password');
-  const [loading, setLoading] = useState(false);
+  const { mutate, isPending } = useLogin();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      login();
-      navigate('/dashboard', { replace: true });
-    }, 1200);
+
+    mutate(
+      { email, password },
+      {
+        onSuccess: (data) => {
+          Cookies.set('token', data.access_token, { expires: 2 / 24 })
+
+          navigate('/dashboard', { replace: true });
+        },
+        onError: (error) => {
+          message.error(error.message || 'Invalid email or password');
+        },
+      }
+    );
   };
 
   return (
@@ -46,6 +59,7 @@ export default function LoginPage() {
                 placeholder="admin@sellify.com"
               />
             </div>
+
             <div>
               <label className="block text-xs font-medium text-slate-300 mb-1.5">Password</label>
               <input
@@ -56,21 +70,20 @@ export default function LoginPage() {
                 placeholder="••••••••"
               />
             </div>
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={isPending}
               className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 mt-2"
             >
-              {loading
+              {isPending
                 ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 : 'Sign In'
               }
             </button>
           </form>
 
-          <p className="text-xs text-slate-500 text-center mt-6">
-            Demo: admin@sellify.com / password
-          </p>
+
         </div>
       </div>
     </div>
