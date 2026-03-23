@@ -12,6 +12,7 @@ const updateOrderStatus = async ({ id, status }: { id: string; status: OrderStat
     const res = await fetch(`${API_URL}/order/author/${id}/status`, {
         method: 'PATCH',
         headers: {
+            'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({ status }),
