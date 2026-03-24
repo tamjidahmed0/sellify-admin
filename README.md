@@ -32,7 +32,11 @@ This project is part of the Sellify ecosystem. All three repositories work toget
 
 ## Screenshots
 
-> Screenshots coming soon.
+![Dashboard Page](screenshots/dashboard.png)
+
+![order Page](screenshots/order.png)
+
+![review Page](screenshots/review.png)
 
 ---
 
